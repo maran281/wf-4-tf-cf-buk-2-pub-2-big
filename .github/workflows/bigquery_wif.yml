@@ -1,0 +1,36 @@
+
+name: "Deploying amazing cloud function"
+
+on: 
+    push: 
+        branches: 
+            - main
+
+jobs:
+    deploy_my_amazing_cf:
+        runs-on: ubuntu
+        permissions: 
+            contents: 'read'
+            id-token: 'write'
+
+        steps:
+            - name: checkout my code
+              uses: actions/checkout@v3
+            
+            - id: 'auth'
+              name: 'authenticating my google project'
+              uses: 'google-github-actions/auth@v1'
+              with:
+                  token_format: 'access_token'
+                  workload_identity_provider: ''
+                  service_account: 
+                
+            - name: 'setup my cloud SDK'
+              uses: 'google-github-actions/setup-gcloud@v1'
+
+            - name: 'Initialize the terraform'
+              run: |
+                cd terraform
+                terraform init
+                terraform apply -auto-approve
+                terraform taint 
