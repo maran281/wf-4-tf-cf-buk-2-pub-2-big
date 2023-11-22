@@ -12,7 +12,7 @@ jobs:
         permissions: 
             contents: 'read'
             id-token: 'write'
-
+ 
         steps:
             - name: checkout my code
               uses: actions/checkout@v3
