@@ -8,7 +8,7 @@ on:
 
 jobs:
     deploy_my_amazing_cf:
-        runs-on: ubuntu
+        runs-on: ubuntu-latest
         permissions: 
             contents: 'read'
             id-token: 'write'
