@@ -34,4 +34,3 @@ jobs:
                 terraform init
                 terraform apply -auto-approve
                 terraform taint google_cloudfunctions_function.cf_4_wf_4_tf_buk_2_pub_big_1
-
