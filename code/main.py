@@ -12,8 +12,8 @@ def publish_message(data, context):
 
     file_name = data['name']
     bucket_name = data['bucket']
-
-    return f"A file named:{file_name} is picked from bucket named:{bucket_name}"
+    print(f"A file named:{file_name} is picked from bucket named:{bucket_name}")
+    return f"success"
 
 #below is a working code which triggers the cloud function with a https trigger
 #def publish_message(request):
