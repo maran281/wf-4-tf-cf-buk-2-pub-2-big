@@ -61,8 +61,12 @@ resource "google_cloudfunctions_function" "cf_4_wf_4_tf_buk_2_pub_big_1" {
   runtime = "python310"
   source_archive_bucket = google_storage_bucket.cf_sc_4_wf_4_tf_buk_2_pub_big.name
   source_archive_object = google_storage_bucket_object.cf_sourcecodeobject_4_wf_4_tf_buk_2_pub_big.name
-  trigger_http = true
   entry_point = "publish_message"
+
+  event_trigger {
+    event_type = "google.storage.object.finalize"
+    resource = google_storage_bucket.cf_sourcefilebucket_4_wf_4_tf_buk_2_pub_big.name
+  }
 
   service_account_email = "my-wf-4-tf-cf-buk-2-pub-2-big@plated-hash-405319.iam.gserviceaccount.com"
 }
