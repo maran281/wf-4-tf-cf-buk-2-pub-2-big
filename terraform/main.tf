@@ -20,7 +20,7 @@ resource "google_storage_bucket" "cf_sourcecode_4_wf_4_tf_buk_2_pub_big" {
 #resource which places the source code object for the cloud function from local to the bucket
 resource "google_storage_bucket_object" "cf_sourcecodeobject_4_wf_4_tf_buk_2_pub_big" {
     name = "main.zip"
-    bucket = "google_storage_bucket.cf_sourcecode_4_wf_4_tf_buk_2_pub_big.name"  
+    bucket = "google_storage_bucket.cf_sourcecode_4_wf_4_tf_buk_2_pub_big"  
     source = "../code/main.zip"
 }
 
