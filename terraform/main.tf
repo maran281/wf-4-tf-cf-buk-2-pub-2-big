@@ -60,7 +60,7 @@ resource "google_cloudfunctions_function" "cf_4_wf_4_tf_buk_2_pub_big_1" {
   name = "cf_4_wf_4_tf_buk_2_pub_big"
   runtime = "python310"
   source_archive_bucket = google_storage_bucket.cf_sourcecode_4_wf_4_tf_buk_2_pub_big.name
-  source_archive_object = google_storage_bucket.cf_sourcecodeobject_4_wf_4_tf_buk_2_pub_big.name
+  source_archive_object = google_storage_bucket_object.cf_sourcecodeobject_4_wf_4_tf_buk_2_pub_big.name
   trigger_http = true
   entry_point = "publish_message"
 
