@@ -1,7 +1,9 @@
 import os
 import json
 import functions_framework
-from google.cloud import pubsub_v1, storage, bigquery
+from google.cloud import pubsub_v1 
+from google.cloud import storage
+from google.cloud import bigquery
 
 def publish_message(data, context):
     
