@@ -32,7 +32,7 @@ def publish_message(data, context):
 
     for element in root.findall('.//book'): 
         print("debug7")  
-        print(f"{element}")  
+        print(f"{element.text}")  
         print("debug8")  
         row_data={
             "book": element.find('book').text
