@@ -16,24 +16,34 @@ def publish_message(data, context):
     print(f"A file named:{file_name} is picked from bucket named:{bucket_name}")
 
     #get the content of the xml file
+    print("debug1")
     bucket = storage_client.bucket(bucket_name)
+    print("debug2")
     blob = bucket.blob(file_name)
+    print("debug3")
     content = blob.download_as_text()
+    print("debug4")
 
     root = ET.fromstring(content)
+    print("debug5")
 
     rows = [] 
+    print("debug6")
 
-    for element in root.findall('.//catalog'):   
+    for element in root.findall('.//catalog'): 
+        print("debug7")  
         row_data={
             "book": element.find('book').text
         }
+        print("debug8")
         rows.append(row_data)
+        print("debug9")
 
     for row in rows:
+        print("debug10")
         message_data = str(row)
-        print(f"message_data")
-
+        print(f"{message_data}")
+ 
     return f"success"
 
 #below is a working code which triggers the cloud function with a https trigger
