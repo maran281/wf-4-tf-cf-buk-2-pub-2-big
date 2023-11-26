@@ -36,15 +36,18 @@ resource "google_storage_bucket" "cf_targetfilebucket_4_wf_4_tf_buk_2_pub_big" {
   location = "us-east1"
 }
 
+#Pubsub topic where CF will push the messages
 resource "google_pubsub_topic" "cf_pubsub_4_wf_4_tf_buk_2_pub_big" {
   name = "pubsub_4_wf_4_tf_buk_2_pub_big"
 }
 
+#pull subscription
 resource "google_pubsub_subscription" "pubsub_subscription_4_wf_4_tf_buk_2_pub_big" {
   name = "pubsub_subscription_4_wf_4_tf_buk_2_pub_big"
   topic = google_pubsub_topic.cf_pubsub_4_wf_4_tf_buk_2_pub_big.name
 }
 
+#Bigquery dataset where CF will publish the data
 resource "google_bigquery_dataset" "bq_dataset_4_wf_4_tf_buk_2_pub_big" {
     dataset_id = "bq_dataset_4_wf_4_tf_buk_2_pub_big_id"
     project = "plated-hash-405319"
@@ -77,4 +80,3 @@ resource "google_cloudfunctions_function_iam_member" "invoker" {
   role = "roles/cloudfunctions.invoker"
   depends_on = [ google_cloudfunctions_function.cf_4_wf_4_tf_buk_2_pub_big_1 ]
 }
-

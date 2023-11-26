@@ -1,10 +1,11 @@
 import os
 import json
 import functions_framework
+import xml.etree.ElementTree as ET
 from google.cloud import pubsub_v1, storage, bigquery
 
 def publish_message(data, context):
-    
+
     #defining all clients
     storage_client = storage.Client() 
     pubsub_client = pubsub_v1.PublisherClient()
@@ -13,6 +14,26 @@ def publish_message(data, context):
     file_name = data['name']
     bucket_name = data['bucket']
     print(f"A file named:{file_name} is picked from bucket named:{bucket_name}")
+
+    #get the content of the xml file
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(file_name)
+    content = blob.download_as_text()
+
+    root = ET.fromstring(content)
+
+    rows = [] 
+
+    for element in root.findall('.//catalog')   
+        row_data={
+            "book": element.find('book').text
+        }
+        rows.append(row_data)
+
+    for row in rows:
+        message_data = str(row)
+        print(f"message_data")
+
     return f"success"
 
 #below is a working code which triggers the cloud function with a https trigger
@@ -41,6 +62,6 @@ def publish_message(data, context):
 #    print("Debug 7")
 #    message_id = future.result
 #    print("Debug 8")
-#    
+#
 #    return f"Message {message_id} is published to topic {topic_name}"
 #
