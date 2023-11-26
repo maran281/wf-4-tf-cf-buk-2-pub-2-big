@@ -24,7 +24,7 @@ def publish_message(data, context):
 
     rows = [] 
 
-    for element in root.findall('.//catalog')   
+    for element in root.findall('.//catalog'):   
         row_data={
             "book": element.find('book').text
         }
