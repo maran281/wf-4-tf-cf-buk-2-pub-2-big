@@ -43,7 +43,7 @@ def publish_message(data, context):
         print("debug10")
         message_data = str(row)
         print(f"{message_data}")
- 
+  
     return f"success"
  
 #below is a working code which triggers the cloud function with a https trigger
