@@ -45,7 +45,7 @@ def publish_message(data, context):
         print(f"{message_data}")
   
     return f"success"
-  
+
 #below is a working code which triggers the cloud function with a https trigger
 #def publish_message(request):
 #    #get the incoming data from http request

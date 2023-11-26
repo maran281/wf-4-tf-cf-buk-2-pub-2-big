@@ -80,4 +80,7 @@ resource "google_cloudfunctions_function_iam_member" "invoker" {
   role = "roles/cloudfunctions.invoker"
   depends_on = [ google_cloudfunctions_function.cf_4_wf_4_tf_buk_2_pub_big_1 ]
   
+  lifecycle {
+    create_before_destroy = true
+  }
 }
