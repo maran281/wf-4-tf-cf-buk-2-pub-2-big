@@ -30,7 +30,7 @@ def publish_message(data, context):
     rows = [] 
     print("debug6")
 
-    for element in root.findall('.//catalog'): 
+    for element in root.findall('.//book'): 
         print("debug7")  
         row_data={
             "book": element.find('book').text
