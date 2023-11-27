@@ -11,23 +11,6 @@ terraform {
   }
 }
 
-#Creating a zip file from the code files
-data "archive_file" "cfFiles" {
-
-  type = "zip"
-  output_path = "../code/main.zip"
-
-  source {
-    content = "../code/main.py"
-    filename = "main.py"
-  }
-
-  source {
-    content = "../code/requirements.txt"
-    filename = "requirements.txt"
-  }
-}
-
 #Bucket which stores the souce code for the cloud function
 resource "google_storage_bucket" "cf_sc_4_wf_4_tf_buk_2_pub_big" {
   name = "bucket_sourcecode_4_wf_4_tf_buk_2_pub_big"
