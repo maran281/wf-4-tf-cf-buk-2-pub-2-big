@@ -16,7 +16,6 @@ data "archive_file" "cfFiles" {
 
   type = "zip"
   output_path = "../code/main.zip"
-  excludes = "../code/unwanted.zip"
 
   source {
     content = "../code/main.py"
