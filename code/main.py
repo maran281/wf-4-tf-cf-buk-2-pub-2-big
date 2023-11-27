@@ -9,6 +9,7 @@ def publish_message(data, context):
     #defining all clients
     storage_client = storage.Client() 
     pubsub_client = pubsub_v1.PublisherClient()
+    topic_path = pubsub_client.topic_path("plated-hash-405319","pubsub_4_wf_4_tf_buk_2_pub_big")
     bigquery_client = bigquery.Client()
 
     file_name = data['name']
@@ -25,9 +26,7 @@ def publish_message(data, context):
     rows = [] 
 
     for element in root.findall('.//book'): 
-        print("debug1")
         print(f"{element.text}")  
-        print("debug2")
         row_data={
             "id": element.get("id"),
             "author": element.get("author"),
@@ -37,18 +36,20 @@ def publish_message(data, context):
             "publish_date": element.find('publish_date').text,
             "description": element.find('description').text,
         }
-        print("debug3")
 
   #Convert data into xml format
         book_xml="<book>"
-        print("debug4")
         for key,value in row_data.items():
-            print("debug5")
             book_xml += f"<{key}>{value}</{key}>"
         book_xml+="</book>"
 
-        print("debug6")
+        #publish xml content to pubsub
 
+        print("debug1")
+
+        message_future = pubsub_client.publish(topic_path,data=book_xml.encode("utf-8"))
+        print("debug2")
+        print("Below xml content has been published")
         print(f"{book_xml}")
   
     return f"success"
