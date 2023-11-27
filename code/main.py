@@ -8,22 +8,25 @@ def publish_message(data, context):
 
     #defining all clients
     storage_client = storage.Client() 
+
     pubsub_client = pubsub_v1.PublisherClient()
     topic_path = pubsub_client.topic_path("plated-hash-405319","pubsub_4_wf_4_tf_buk_2_pub_big")
     bigquery_client = bigquery.Client()
 
-    file_name = data['name']
-    bucket_name = data['bucket']
-    print(f"A file named:{file_name} is picked from bucket named:{bucket_name}")
+    source_file_name = data['name']
+    source_bucket = data['bucket']
+    print(f"A file named:{source_file_name} is picked from bucket named:{source_bucket}")
+
+    target_bucket = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
 
     #get the content of the xml file
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(file_name)
-    content = blob.download_as_text()
+    bucket = storage_client.bucket(source_bucket)
+    source_blob = bucket.blob(source_file_name)
+    content = source_blob.download_as_text()
 
     root = ET.fromstring(content)
 
-    rows = [] 
+    file_counter = 1
 
     for element in root.findall('.//book'): 
         print(f"{element.text}")  
@@ -44,14 +47,26 @@ def publish_message(data, context):
         book_xml+="</book>"
 
         #publish xml content to pubsub
-
-        print("debug1")
-
         message_future = pubsub_client.publish(topic_path,data=book_xml.encode("utf-8"))
-        print("debug2")
-        print("Below xml content has been published")
+        print("xml content has been published to pubsub")
         print(f"{book_xml}")
-  
+    
+  #Write xml content into an xml file and push it to cloud storage
+        print("debug1")
+        target_file_name="xml_file_processed_"+file_counter
+        print("debug2")
+        with open(target_file_name, 'w') as file:
+            print("debug3")
+            file.write(book_xml)
+        
+        print("debug4")
+        target_blob = target_bucket.blob(target_file_name)
+        print("debug5")
+        target_blob.upload_from_filename(target_file_name)
+        print("debug6")
+        file_counter = file_counter+1
+        print("debug7")
+
     return f"success"
 
 #below is a working code which triggers the cloud function with a https trigger
