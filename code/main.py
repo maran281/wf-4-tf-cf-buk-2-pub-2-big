@@ -16,35 +16,40 @@ def publish_message(data, context):
     print(f"A file named:{file_name} is picked from bucket named:{bucket_name}")
 
     #get the content of the xml file
-    print("debug1")
     bucket = storage_client.bucket(bucket_name)
-    print("debug2")
     blob = bucket.blob(file_name)
-    print("debug3")
     content = blob.download_as_text()
-    print("debug4")
 
     root = ET.fromstring(content)
-    print("debug5")
 
     rows = [] 
-    print("debug6")
 
     for element in root.findall('.//book'): 
-        print("debug7")  
+        print("debug1")
         print(f"{element.text}")  
-        print("debug8")  
+        print("debug2")
         row_data={
-            "book": element.find('book').text
+            "id": element.get("id"),
+            "author": element.get("author"),
+            "title": element.find('title').text,
+            "genre": element.find('genre').text,
+            "price": float(element.find('price').text),
+            "publish_date": element.find('publish_date').text,
+            "description": element.find('description').text,
         }
-        print("debug8")
-        rows.append(row_data)
-        print("debug9")
+        print("debug3")
 
-    for row in rows:
-        print("debug10")
-        message_data = str(row)
-        print(f"{message_data}")
+  #Convert data into xml format
+        book_xml="<book>"
+        print("debug4")
+        for key,value in row_data.items():
+            print("debug5")
+            book_xml += f"<{key}>{value}</{key}>"
+        book_xml="</book>"
+
+        print("debug6")
+
+        print(f"{book_xml}")
   
     return f"success"
 
