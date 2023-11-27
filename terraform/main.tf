@@ -15,16 +15,16 @@ terraform {
 data "archive_file" "cfFiles" {
 
   type = "zip"
-  output_path = "${path.module}/code/main.zip"
-  excludes = "${path.module}/code/unwanted.zip"
+  output_path = "../code/main.zip"
+  excludes = "../code/unwanted.zip"
 
   source {
-    content = "${path.module}/code/main.py"
+    content = "../code/main.py"
     filename = "main.py"
   }
 
   source {
-    content = "${path.module}/code/requirements.txt"
+    content = "../code/requirements.txt"
     filename = "requirements.txt"
   }
 }
