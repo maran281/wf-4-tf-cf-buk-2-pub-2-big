@@ -45,7 +45,7 @@ def publish_message(data, context):
         for key,value in row_data.items():
             print("debug5")
             book_xml += f"<{key}>{value}</{key}>"
-        book_xml="</book>"
+        book_xml+="</book>"
 
         print("debug6")
 
