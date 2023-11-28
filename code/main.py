@@ -3,8 +3,6 @@ import tempfile
 import xml.etree.ElementTree as ET
 from google.cloud import pubsub_v1, storage, bigquery
 
-file_counter = 1
-
 #defining storage client
 storage_client = storage.Client()
 target_bucket_ref = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
@@ -31,6 +29,8 @@ def publish_message(data, context):
     #Reading an XML content from the file one by one
     root = ET.fromstring(content)
 
+    file_counter = 1
+    
     # below for loop checks all the xml tags with name 'book', one by one 
     # and storing its content to 'element' variable, 
     # then we are fetching the key, value from 'element' 
@@ -64,7 +64,7 @@ def publish_message(data, context):
   
   #we are using tempfile(python library) to create a temporary file WITHIN THIS INSTANCE MEMORY 
   # and storing the xml content from 'book_xml' into that temp file
-  
+
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(book_xml.encode("utf-8"))
 
@@ -76,6 +76,8 @@ def publish_message(data, context):
 
         file_counter = file_counter + 1
     return f"success"
+
+
 
 def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
     target_blob = t_bucket_ref.blob(t_f_name)
