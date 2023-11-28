@@ -74,6 +74,8 @@ def publish_message(data, context):
 
         # Clean up the temporary file (optional)
         os.remove(temp_file.name)
+
+        file_counter = file_counter + 1
         print("debug10")
     return f"success"
 
