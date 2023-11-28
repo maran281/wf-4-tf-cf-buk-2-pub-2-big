@@ -3,13 +3,13 @@ import tempfile
 import xml.etree.ElementTree as ET
 from google.cloud import pubsub_v1, storage, bigquery
 
+file_counter = 1
+
 #defining storage client
 storage_client = storage.Client()
+target_bucket_ref = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
 
 def publish_message(data, context):
-
-    #defining storage client
-    #storage_client = storage.Client() 
 
     #defining pubsub client and topic path
     pubsub_client = pubsub_v1.PublisherClient()
@@ -18,24 +18,24 @@ def publish_message(data, context):
     #defining bigquery client
     bigquery_client = bigquery.Client()
 
-    #Fetching metadata when function triggers
+    #Fetching metadata after function triggers
     source_file_name = data['name']
     source_bucket = data['bucket']
     print(f"A file named:{source_file_name} is picked from bucket named:{source_bucket}")
-
-    target_bucket_ref = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
 
     #get the content of the xml file
     bucket_ref = storage_client.bucket(source_bucket)
     source_blob = bucket_ref.blob(source_file_name)
     content = source_blob.download_as_text()
 
+    #Reading an XML content from the file one by one
     root = ET.fromstring(content)
 
-    file_counter = 1
-
+    # below for loop checks all the xml tags with name 'book', one by one 
+    # and storing its content to 'element' variable, 
+    # then we are fetching the key, value from 'element' 
+    # and storing it into 'row_date'
     for element in root.findall('.//book'): 
-        print(f"{element.text}")  
         row_data={
             "id": element.get("id"),
             "author": element.get("author"),
@@ -46,7 +46,8 @@ def publish_message(data, context):
             "description": element.find('description').text,
         }
 
-  #Convert data into xml format
+  #Creating an xml content for each 'book' tag in the source xml
+  # and storing it into a variable 'book_xml' 
         book_xml="<book>"
         for key,value in row_data.items():
             book_xml += f"<{key}>{value}</{key}>"
@@ -57,36 +58,28 @@ def publish_message(data, context):
         print("xml content has been published to pubsub")
         print(f"{book_xml}")
     
-  #Write xml content into an xml file and push it to cloud storage
-        print("debug2")
+  #Write xml content into an xml file and publishe it to cloud storage
         target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
         print(f"Target file name would be {target_file_name}")
-        
+  
+  #we are using tempfile(python library) to create a temporary file WITHIN THIS INSTANCE MEMORY 
+  # and storing the xml content from 'book_xml' into that temp file
+  
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            print("debug3")
             temp_file.write(book_xml.encode("utf-8"))
-        
-        print("debug4")
 
         # Upload the temporary file to Google Cloud Storage
         upload_to_gcs(target_bucket_ref, target_file_name, temp_file.name)
-        print("debug9")
 
         # Clean up the temporary file (optional)
         os.remove(temp_file.name)
 
         file_counter = file_counter + 1
-        print("debug10")
     return f"success"
 
 def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
-    print("debug5")
     target_blob = t_bucket_ref.blob(t_f_name)
-    print("debug6")
-
     target_blob.upload_from_filename(local_file_path)
-    print("debug7")
-
 
 #below is a working code which triggers the cloud function with a https trigger
 #def publish_message(request):
