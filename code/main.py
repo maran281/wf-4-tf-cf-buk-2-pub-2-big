@@ -23,7 +23,7 @@ def publish_message(data, context):
     source_bucket = data['bucket']
     print(f"A file named:{source_file_name} is picked from bucket named:{source_bucket}")
 
-    target_bucket = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
+    target_bucket_ref = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
 
     #get the content of the xml file
     bucket_ref = storage_client.bucket(source_bucket)
@@ -69,7 +69,7 @@ def publish_message(data, context):
         print("debug4")
 
         # Upload the temporary file to Google Cloud Storage
-        upload_to_gcs(target_bucket, target_file_name, temp_file.name)
+        upload_to_gcs(target_bucket_ref, target_file_name, temp_file.name)
         print("debug9")
 
         # Clean up the temporary file (optional)
@@ -77,15 +77,13 @@ def publish_message(data, context):
         print("debug10")
     return f"success"
 
-def upload_to_gcs(t_bucket, t_f_name, local_file_path):
+def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
     print("debug5")
-    t_bucket_ref = storage_client.bucket(t_bucket)
-    print("debug6")
     target_blob = t_bucket_ref.blob(t_f_name)
-    print("debug7")
+    print("debug6")
 
     target_blob.upload_from_filename(local_file_path)
-    print("debug8")
+    print("debug7")
 
 
 #below is a working code which triggers the cloud function with a https trigger
