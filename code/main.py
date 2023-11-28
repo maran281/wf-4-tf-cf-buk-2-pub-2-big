@@ -55,14 +55,15 @@ def publish_message(data, context):
         print("debug1")
         target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
         print("debug2")
-        with open(target_file_name, 'w') as file:
-            print("debug3")
-            file.write(book_xml)
+
+        file1 = open(target_file_name, 'w+')
+        print("debug3")
+        file1.write(book_xml)
         
         print("debug4")
-        target_blob = target_bucket.blob(target_file_name)
+        target_blob = target_bucket.blob(file1)
         print("debug5")
-        target_blob.upload_from_filename(target_file_name)
+        target_blob.upload_from_filename(file1)
         print("debug6")
         file_counter = file_counter+1
         print("debug7")
