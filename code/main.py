@@ -55,13 +55,13 @@ def publish_message(data, context):
         print(f"{book_xml}")
     
   #Write xml content into an xml file and push it to cloud storage
-        print("debug1")
-        target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
         print("debug2")
+        target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
+        print(f"Target file name would be {target_file_name}")
         
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             print("debug3")
-            temp_file.write(book_xml)
+            temp_file.write(book_xml.encode("utf-8"))
         
         print("debug4")
 
