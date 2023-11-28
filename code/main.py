@@ -64,7 +64,7 @@ def publish_message(data, context):
         
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             print("debug3")
-            temp_file.write(book_xml)
+            temp_file.write(book_xml.encode("utf-8"))
         
         print("debug4")
 
