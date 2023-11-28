@@ -3,10 +3,13 @@ import tempfile
 import xml.etree.ElementTree as ET
 from google.cloud import pubsub_v1, storage, bigquery
 
+#defining storage client
+storage_client = storage.Client()
+
 def publish_message(data, context):
 
     #defining storage client
-    storage_client = storage.Client() 
+    #storage_client = storage.Client() 
 
     #defining pubsub client and topic path
     pubsub_client = pubsub_v1.PublisherClient()
@@ -61,12 +64,12 @@ def publish_message(data, context):
         
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             print("debug3")
-            temp_file.write(book_xml.encode("utf-8"))
+            temp_file.write(book_xml)
         
         print("debug4")
 
         # Upload the temporary file to Google Cloud Storage
-        upload_to_gcs(target_bucket, target_file_name, temp_file.name, storage_client)
+        upload_to_gcs(target_bucket, target_file_name, temp_file.name)
         print("debug9")
 
         # Clean up the temporary file (optional)
@@ -74,9 +77,9 @@ def publish_message(data, context):
         print("debug10")
     return f"success"
 
-def upload_to_gcs(t_bucket, t_f_name, local_file_path, s_client):
+def upload_to_gcs(t_bucket, t_f_name, local_file_path):
     print("debug5")
-    t_bucket_ref = s_client.bucket(t_bucket)
+    t_bucket_ref = storage_client.bucket(t_bucket)
     print("debug6")
     target_blob = t_bucket_ref.blob(t_f_name)
     print("debug7")
