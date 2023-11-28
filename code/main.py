@@ -1,18 +1,21 @@
 import os
-import json
-import functions_framework
+import tempfile
 import xml.etree.ElementTree as ET
 from google.cloud import pubsub_v1, storage, bigquery
 
 def publish_message(data, context):
 
-    #defining all clients
+    #defining storage client
     storage_client = storage.Client() 
 
+    #defining pubsub client and topic path
     pubsub_client = pubsub_v1.PublisherClient()
     topic_path = pubsub_client.topic_path("plated-hash-405319","pubsub_4_wf_4_tf_buk_2_pub_big")
+    
+    #defining bigquery client
     bigquery_client = bigquery.Client()
 
+    #Fetching metadata when function triggers
     source_file_name = data['name']
     source_bucket = data['bucket']
     print(f"A file named:{source_file_name} is picked from bucket named:{source_bucket}")
@@ -20,8 +23,8 @@ def publish_message(data, context):
     target_bucket = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
 
     #get the content of the xml file
-    bucket = storage_client.bucket(source_bucket)
-    source_blob = bucket.blob(source_file_name)
+    bucket_ref = storage_client.bucket(source_bucket)
+    source_blob = bucket_ref.blob(source_file_name)
     content = source_blob.download_as_text()
 
     root = ET.fromstring(content)
@@ -55,20 +58,32 @@ def publish_message(data, context):
         print("debug1")
         target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
         print("debug2")
-
-        file1 = open(target_file_name, 'w+')
-        print("debug3")
-        file1.write(book_xml)
+        
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            print("debug3")
+            temp_file.write(book_xml)
         
         print("debug4")
-        target_blob = target_bucket.blob(file1)
-        print("debug5")
-        target_blob.upload_from_filename(file1)
-        print("debug6")
-        file_counter = file_counter+1
-        print("debug7")
 
+        # Upload the temporary file to Google Cloud Storage
+        upload_to_gcs(target_bucket, target_file_name, temp_file.name, storage_client)
+        print("debug9")
+
+        # Clean up the temporary file (optional)
+        os.remove(temp_file.name)
+        print("debug10")
     return f"success"
+
+def upload_to_gcs(t_bucket, t_f_name, local_file_path, s_client):
+    print("debug5")
+    t_bucket_ref = s_client.bucket(t_bucket)
+    print("debug6")
+    target_blob = t_bucket_ref.blob(t_f_name)
+    print("debug7")
+
+    target_blob.upload_from_filename(local_file_path)
+    print("debug8")
+
 
 #below is a working code which triggers the cloud function with a https trigger
 #def publish_message(request):
