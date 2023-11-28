@@ -53,7 +53,7 @@ def publish_message(data, context):
     
   #Write xml content into an xml file and push it to cloud storage
         print("debug1")
-        target_file_name="xml_file_processed_"+f"{file_counter}"
+        target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
         print("debug2")
         with open(target_file_name, 'w') as file:
             print("debug3")
