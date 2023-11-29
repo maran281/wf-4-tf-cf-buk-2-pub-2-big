@@ -59,6 +59,23 @@ resource "google_bigquery_dataset" "bq_dataset_4_wf_4_tf_buk_2_pub_big" {
     }
 }
 
+#Bigquery table where CF will publish the data
+resource "google_bigquery_table" "bq_table_4_wf_4_tf_buk_2_pub_big" {
+  dataset_id = google_bigquery_dataset.bq_dataset_4_wf_4_tf_buk_2_pub_big.dataset_id
+  table_id = "bq_table_4_wf_4_tf_buk_2_pub_big"
+
+  schema = <<EOF
+  [
+    {"name":"column1", "type":"STRING"},
+    {"name":"column2", "type":"STRING"}
+  ]
+  EOF
+
+  time_partitioning {
+    type = "DAY"
+  }
+}
+
 resource "google_cloudfunctions_function" "cf_4_wf_4_tf_buk_2_pub_big_1" {
   name = "cf_4_wf_4_tf_buk_2_pub_big"
   runtime = "python310"
