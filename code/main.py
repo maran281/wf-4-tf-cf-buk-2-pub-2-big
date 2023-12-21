@@ -7,11 +7,11 @@ from google.cloud import pubsub_v1, storage, bigquery
 storage_client = storage.Client()
 target_bucket_ref = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
 
-def publish_message(data, context):
+#defining pubsub client and topic path
+pubsub_client = pubsub_v1.PublisherClient()
+topic_path = pubsub_client.topic_path("plated-hash-405319","pubsub_4_wf_4_tf_buk_2_pub_big")
 
-    #defining pubsub client and topic path
-    pubsub_client = pubsub_v1.PublisherClient()
-    topic_path = pubsub_client.topic_path("plated-hash-405319","pubsub_4_wf_4_tf_buk_2_pub_big")
+def publish_message(data, context):
     
     #defining bigquery client
     bigquery_client = bigquery.Client()
@@ -54,9 +54,7 @@ def publish_message(data, context):
         book_xml+="</book>"
 
         #publish xml content to pubsub
-        message_future = pubsub_client.publish(topic_path,data=book_xml.encode("utf-8"))
-        print("xml content has been published to pubsub")
-        print(f"{book_xml}")
+        upload_to_pubsub(book_xml)
     
   #Write xml content into an xml file and publishe it to cloud storage
         target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
@@ -77,7 +75,10 @@ def publish_message(data, context):
         file_counter = file_counter + 1
     return f"success"
 
-
+def upload_to_pubsub(xml_content):
+    message_future = pubsub_client.publish(topic_path,data=xml_content.encode("utf-8"))
+    print("xml content has been published to pubsub")
+    print(f"{xml_content}")
 
 def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
     target_blob = t_bucket_ref.blob(t_f_name)
