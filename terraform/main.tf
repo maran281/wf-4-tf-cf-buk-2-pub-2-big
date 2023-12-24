@@ -64,7 +64,8 @@ resource "google_bigquery_table" "bq_table_4_wf_4_tf_buk_2_pub_big" {
   dataset_id = google_bigquery_dataset.bq_dataset_4_wf_4_tf_buk_2_pub_big.dataset_id
   table_id = "bq_table_4_wf_4_tf_buk_2_pub_big"
   
-  schema = file("schemas/bq_table1_schema.json")
+  #schema = jsondecode(file("schemas/bq_table1_schema.json"))
+  schema = jsondecode(file("{path.root}/terraform/schemas/bq_table1_schema.json"))
 
 #Below example shows if you want to hardcode the schema in the file itself
 #  schema = <<EOF
