@@ -1,32 +1,34 @@
 import os
 import tempfile
+import json
+import xmltodict
 import xml.etree.ElementTree as ET
 from google.cloud import pubsub_v1, storage, bigquery
 
-#defining storage client
+# defining storage client
 storage_client = storage.Client()
 target_bucket_ref = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
 
-#defining pubsub client and topic path
+# defining pubsub client and topic path
 pubsub_client = pubsub_v1.PublisherClient()
 topic_path = pubsub_client.topic_path("plated-hash-405319","pubsub_4_wf_4_tf_buk_2_pub_big")
 
+# defining bigquery client and topic path
+bq_client = bigquery.Client(project='plated-hash-405319')
+
 def publish_message(data, context):
     
-    #defining bigquery client
-    bigquery_client = bigquery.Client()
-
     #Fetching metadata after function triggers
     source_file_name = data['name']
     source_bucket = data['bucket']
     print(f"A file named:{source_file_name} is picked from bucket named:{source_bucket}")
 
-    #get the content of the xml file
+    # get the content of the xml file
     bucket_ref = storage_client.bucket(source_bucket)
     source_blob = bucket_ref.blob(source_file_name)
     content = source_blob.download_as_text()
 
-    #Reading an XML content from the file one by one
+    # Reading an XML content from the file one by one
     root = ET.fromstring(content)
 
     file_counter = 1
@@ -46,22 +48,28 @@ def publish_message(data, context):
             "description": element.find('description').text,
         }
 
-  #Creating an xml content for each 'book' tag in the source xml
-  # and storing it into a variable 'book_xml' 
+        # Creating an xml content for each 'book' tag in the source xml
+        # and storing it into a variable 'book_xml'
         book_xml="<book>"
         for key,value in row_data.items():
             book_xml += f"<{key}>{value}</{key}>"
         book_xml+="</book>"
 
-        #publish xml content to pubsub
+        # publish xml content to pubsub
         upload_to_pubsub(book_xml)
+
+        # Convert xml data into jsonl format
+        json_conv_data = xml_to_json_conv(book_xml)
+
+        # publish json string to bigquery dataset
+        upload_to_bq(json_conv_data, 'plated-hash-405319', 'bq_dataset_4_wf_4_tf_buk_2_pub_big_id', 'bq_table_4_wf_4_tf_buk_2_pub_big')
     
-  #Write xml content into an xml file and publishe it to cloud storage
+        # Write xml content into an xml file and publishe it to cloud storage
         target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
         print(f"Target file name would be {target_file_name}")
   
-  #we are using tempfile(python library) to create a temporary file WITHIN THIS INSTANCE MEMORY 
-  # and storing the xml content from 'book_xml' into that temp file
+        # we are using tempfile(python library) to create a temporary file WITHIN THIS INSTANCE MEMORY 
+        # and storing the xml content from 'book_xml' into that temp file
 
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(book_xml.encode("utf-8"))
@@ -75,14 +83,50 @@ def publish_message(data, context):
         file_counter = file_counter + 1
     return f"success"
 
-def upload_to_pubsub(xml_content):
-    message_future = pubsub_client.publish(topic_path,data=xml_content.encode("utf-8"))
+def upload_to_pubsub(xml_content_pb):
+    message_future = pubsub_client.publish(topic_path,data=xml_content_pb.encode("utf-8"))
     print("xml content has been published to pubsub")
-    print(f"{xml_content}")
+    print(f"{xml_content_pb}")
 
 def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
     target_blob = t_bucket_ref.blob(t_f_name)
     target_blob.upload_from_filename(local_file_path)
+
+def xml_to_json_conv(xml_content_bq):
+    # parse xml to json dictionary
+    data_dict = xmltodict.parse(xml_content_bq)
+
+    # Extract relevent data structure from dictionary
+    catalog = data_dict.get('catalog', {})
+    books = catalog.get('book',[])
+
+    # convert each book to JSONL entry
+    jsonl_entries = []
+    for book in books if isinstance(book, list) else [books]:
+        jsonl_entry = json.dumps({"catalog": {"book": book}})
+        jsonl_entries.append(jsonl_entry)
+
+    return jsonl_entries
+
+def upload_to_bq(json_data, project_id, dataset_id, table_id):
+    # convert the json string to a list of dictionaries
+    data = [json.loads(line) for line in json_data.split("\n") if line.strip()]
+
+    # create a BQ table reference
+    table_ref = bq_client.dataset(dataset_id).table(table_id)
+
+    # configuration for loading data  into Bigquery
+    job_config = bigquery.LoadJobConfig(
+        #autodetect=True,  # Automatically detect schema
+        write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+    )
+
+    # Load data into BigQuery table
+    load_job = bq_client.load_table_from_json(data, table_ref, job_config=job_config)
+    load_job.result()
+
+    print(f"Data loaded to {project_id}.{dataset_id}.{table_id}")
+    
 
 #below is a working code which triggers the cloud function with a https trigger
 #def publish_message(request):

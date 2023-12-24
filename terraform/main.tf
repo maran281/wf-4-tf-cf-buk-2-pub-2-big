@@ -63,13 +63,13 @@ resource "google_bigquery_dataset" "bq_dataset_4_wf_4_tf_buk_2_pub_big" {
 resource "google_bigquery_table" "bq_table_4_wf_4_tf_buk_2_pub_big" {
   dataset_id = google_bigquery_dataset.bq_dataset_4_wf_4_tf_buk_2_pub_big.dataset_id
   table_id = "bq_table_4_wf_4_tf_buk_2_pub_big"
+  
+  schema = jsondecode(file("schemas/bq_table1_schema.json"))
 
-  schema = <<EOF
-  [
-    {"name":"column1", "type":"STRING"},
-    {"name":"column2", "type":"STRING"}
-  ]
-  EOF
+#Below example shows if you want to hardcode the schema in the file itself
+#  schema = <<EOF
+#  {"catalog": {"book": {"author": "string", "genre": "string", "price": "number", "publish_date": "string", "description": "string", "Age_Criteria": "string"}}}
+#  EOF
 
   time_partitioning {
     type = "DAY"
@@ -90,7 +90,7 @@ resource "google_cloudfunctions_function" "cf_4_wf_4_tf_buk_2_pub_big_1" {
 
   service_account_email = "my-wf-4-tf-cf-buk-2-pub-2-big@plated-hash-405319.iam.gserviceaccount.com"
 }
-
+ 
 resource "google_cloudfunctions_function_iam_member" "invoker" {
   cloud_function = google_cloudfunctions_function.cf_4_wf_4_tf_buk_2_pub_big_1.name
   member = "allUsers"

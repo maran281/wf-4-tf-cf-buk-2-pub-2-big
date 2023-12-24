@@ -1,0 +1,1 @@
+{"catalog": {"book": {"author": "string", "genre": "string", "price": "number", "publish_date": "string", "description": "string", "Age_Criteria": "string"}}}
