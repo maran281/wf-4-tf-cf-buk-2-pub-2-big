@@ -1,4 +1,5 @@
 [
+    {"name": "id", "type": "STRING", "mode": "NULLABLE"},
     {"name": "author", "type": "STRING", "mode": "NULLABLE"},
     {"name": "genre", "type": "STRING", "mode": "NULLABLE"},
     {"name": "price", "type": "FLOAT", "mode": "NULLABLE"},
