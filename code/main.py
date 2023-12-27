@@ -100,32 +100,29 @@ def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
 
 def xml_to_json_conv(xml_content_bq):
     # parse xml to json dictionary
-    logger.info(f"inside xml_to_json_comv functionx, step1")
     
     data_dict = xmltodict.parse(xml_content_bq)
-    logger.info(f"inside xml_to_json_comv functionx, step2")
 
     # Extract relevent data structure from dictionary
     catalog = data_dict.get('catalog', {})
-    logger.info(f"inside xml_to_json_comv functionx, step3")
     books = catalog.get('book',[])
-    logger.info(f"inside xml_to_json_comv functionx, step4")
 
     # convert each book to JSONL entry
     jsonl_entries = []
-    logger.info(f"inside xml_to_json_comv functionx, step5")
     for book_var in books if isinstance(books, list) else [books]:
         jsonl_entry = json.dumps({"catalog": {"book": book_var}})
         jsonl_entries.append(jsonl_entry)
-    logger.info(f"inside xml_to_json_comv functionx, step6")
     return jsonl_entries
 
 def upload_to_bq(json_data, project_id, dataset_id, table_id):
+    logger.info(f"inside xml_to_json_comv functionx, step1")
     # convert the json string to a list of dictionaries
     data = [json.loads(line) for line in json_data.split("\n") if line.strip()]
+    logger.info(f"inside xml_to_json_comv functionx, step2")
 
     # create a BQ table reference
     table_ref = bq_client.dataset(dataset_id).table(table_id)
+    logger.info(f"inside xml_to_json_comv functionx, step3")
 
     # configuration for loading data  into Bigquery
     job_config = bigquery.LoadJobConfig(
