@@ -62,7 +62,7 @@ def publish_message(data, context):
         json_conv_data = xml_to_json_conv(book_xml)
 
         # publish json string to bigquery dataset
-        upload_to_bq(json_conv_data, 'plated-hash-405319', 'bq_dataset_4_wf_4_tf_buk_2_pub_big_id', 'bq_table_4_wf_4_tf_buk_2_pub_big')
+        #upload_to_bq(json_conv_data, 'plated-hash-405319', 'bq_dataset_4_wf_4_tf_buk_2_pub_big_id', 'bq_table_4_wf_4_tf_buk_2_pub_big')
     
         # Write xml content into an xml file and publishe it to cloud storage
         target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
