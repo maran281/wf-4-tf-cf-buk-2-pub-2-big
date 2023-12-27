@@ -105,18 +105,21 @@ def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
 def xml_to_json_conv(xml_content_bq):
     # parse xml to json dictionary
     logger.info(f"Execution of xml_to_json_conv has been started")
-    
+
     data_dict = xmltodict.parse(xml_content_bq)
 
     # Extract relevent data structure from dictionary
-    catalog = data_dict.get('catalog', {})
-    books = catalog.get('book',[])
+    catalog = data_dict.get('book', {})
+    books = catalog if isinstance(catalog,list) else [catalog]
 
     # convert each book to JSONL entry
     jsonl_entries = []
-    for book_var in books if isinstance(books, list) else [books]:
+    print("Entering the for loop")
+    for book_var in books:
+        print("inside loop")
         jsonl_entry = json.dumps({"catalog": {"book": book_var}})
         jsonl_entries.append(jsonl_entry)
+    print("Exiting the for loop")
     return jsonl_entries
 
 def upload_to_bq(json_data, project_id, dataset_id, table_id):
