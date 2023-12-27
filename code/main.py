@@ -67,6 +67,8 @@ def publish_message(data, context):
         logger.info(f"starting xml to json conversion")
         json_conv_data = xml_to_json_conv(book_xml)
 
+        print(type(json_conv_data))
+
         # publish json string to bigquery dataset
         upload_to_bq(json_conv_data, 'plated-hash-405319', 'bq_dataset_4_wf_4_tf_buk_2_pub_big_id', 'bq_table_4_wf_4_tf_buk_2_pub_big')
     
@@ -90,16 +92,19 @@ def publish_message(data, context):
     return f"success"
 
 def upload_to_pubsub(xml_content_pb):
+    logger.info(f"Execution of upload_to_pubsub has been started")
     message_future = pubsub_client.publish(topic_path,data=xml_content_pb.encode("utf-8"))
     print("xml content has been published to pubsub")
     print(f"{xml_content_pb}")
 
 def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
+    logger.info(f"Execution of upload_to_gcs has been started")
     target_blob = t_bucket_ref.blob(t_f_name)
     target_blob.upload_from_filename(local_file_path)
 
 def xml_to_json_conv(xml_content_bq):
     # parse xml to json dictionary
+    logger.info(f"Execution of xml_to_json_conv has been started")
     
     data_dict = xmltodict.parse(xml_content_bq)
 
@@ -115,6 +120,9 @@ def xml_to_json_conv(xml_content_bq):
     return jsonl_entries
 
 def upload_to_bq(json_data, project_id, dataset_id, table_id):
+
+    logger.info(f"Execution of upload_to_bq has been started")
+
     logger.info(f"inside xml_to_json_comv functionx, step1")
     # convert the json string to a list of dictionaries
     data = [json.loads(line) for line in json_data.split("\n") if line.strip()]
