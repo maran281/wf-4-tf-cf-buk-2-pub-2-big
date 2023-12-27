@@ -114,8 +114,8 @@ def xml_to_json_conv(xml_content_bq):
     # convert each book to JSONL entry
     jsonl_entries = []
     logger.info(f"inside xml_to_json_comv functionx, step5")
-    for book in books if isinstance(book, list) else [books]:
-        jsonl_entry = json.dumps({"catalog": {"book": book}})
+    for book_var in books if isinstance(book_var, list) else [books]:
+        jsonl_entry = json.dumps({"catalog": {"book": book_var}})
         jsonl_entries.append(jsonl_entry)
     logger.info(f"inside xml_to_json_comv functionx, step6")
     return jsonl_entries
