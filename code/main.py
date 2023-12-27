@@ -2,8 +2,13 @@ import os
 import tempfile
 import json
 import xmltodict
+import logging
 import xml.etree.ElementTree as ET
 from google.cloud import pubsub_v1, storage, bigquery
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # defining storage client
 storage_client = storage.Client()
@@ -59,10 +64,11 @@ def publish_message(data, context):
         upload_to_pubsub(book_xml)
 
         # Convert xml data into jsonl format
+        logger.info(f"starting xml to json conversion")
         json_conv_data = xml_to_json_conv(book_xml)
 
         # publish json string to bigquery dataset
-        #upload_to_bq(json_conv_data, 'plated-hash-405319', 'bq_dataset_4_wf_4_tf_buk_2_pub_big_id', 'bq_table_4_wf_4_tf_buk_2_pub_big')
+        upload_to_bq(json_conv_data, 'plated-hash-405319', 'bq_dataset_4_wf_4_tf_buk_2_pub_big_id', 'bq_table_4_wf_4_tf_buk_2_pub_big')
     
         # Write xml content into an xml file and publishe it to cloud storage
         target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
@@ -94,18 +100,24 @@ def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
 
 def xml_to_json_conv(xml_content_bq):
     # parse xml to json dictionary
+    logger.info(f"inside xml_to_json_comv functionx, step1")
+    
     data_dict = xmltodict.parse(xml_content_bq)
+    logger.info(f"inside xml_to_json_comv functionx, step2")
 
     # Extract relevent data structure from dictionary
     catalog = data_dict.get('catalog', {})
+    logger.info(f"inside xml_to_json_comv functionx, step3")
     books = catalog.get('book',[])
+    logger.info(f"inside xml_to_json_comv functionx, step4")
 
     # convert each book to JSONL entry
     jsonl_entries = []
+    logger.info(f"inside xml_to_json_comv functionx, step5")
     for book in books if isinstance(book, list) else [books]:
         jsonl_entry = json.dumps({"catalog": {"book": book}})
         jsonl_entries.append(jsonl_entry)
-
+    logger.info(f"inside xml_to_json_comv functionx, step6")
     return jsonl_entries
 
 def upload_to_bq(json_data, project_id, dataset_id, table_id):
