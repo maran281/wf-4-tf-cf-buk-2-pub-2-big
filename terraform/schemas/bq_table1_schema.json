@@ -1,1 +1,8 @@
-{"catalog": {"book": {"author": "string", "genre": "string", "price": "number", "publish_date": "string", "description": "string", "Age_Criteria": "string"}}}
+[
+    {"name": "author", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "genre", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "price", "type": "FLOAT", "mode": "NULLABLE"},
+    {"name": "publish_date", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "description", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "Age_Criteria", "type": "STRING", "mode": "NULLABLE"}
+]
