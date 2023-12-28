@@ -70,7 +70,7 @@ def publish_message(data, context):
         if file_status == 'success':
             bucket = storage_client.get_bucket(source_bucket)
             blob = bucket.blob(source_file_name)
-            if blob.exists:
+            if blob.exists():
                 blob.delete()
                 logger.info(f"processing of file {source_file_name} is completed and file is deleted from the source bucket")
         else:
