@@ -66,7 +66,7 @@ resource "google_bigquery_table" "bq_table_4_wf_4_tf_buk_2_pub_big" {
   table_id = "bq_table_4_wf_4_tf_buk_2_pub_big"
 
   schema = jsonencode(jsondecode(file("schemas/bq_table1_schema.json")))
-
+  deletion_protection = false
   time_partitioning {
     type = "DAY"
   }
