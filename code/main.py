@@ -1,10 +1,12 @@
 import os
 import tempfile
-import json
-import xmltodict
 import logging
 import xml.etree.ElementTree as ET
-from google.cloud import pubsub_v1, storage, bigquery
+from upload_to_pubsub import upload_to_pubsub
+from xml_to_json_conv import xml_to_json_conv
+from upload_to_gcs import upload_to_gcs
+from upload_to_bq import upload_to_bq
+from google.cloud import storage
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -14,24 +16,17 @@ logger = logging.getLogger(__name__)
 storage_client = storage.Client()
 target_bucket_ref = storage_client.bucket('bucket_targetfile_4_wf_4_tf_buk_2_pub_big')
 
-# defining pubsub client and topic path
-pubsub_client = pubsub_v1.PublisherClient()
-topic_path = pubsub_client.topic_path("plated-hash-405319","pubsub_4_wf_4_tf_buk_2_pub_big")
-
-# defining bigquery client and topic path
-bq_client = bigquery.Client(project='plated-hash-405319')
-
 def publish_message(data, context):
     
     #Fetching metadata after function triggers
     source_file_name = data['name']
     source_bucket = data['bucket']
-    print(f"A file named:{source_file_name} is picked from bucket named:{source_bucket}")
+
+    logger.info(f"A file named:{source_file_name} is picked from bucket named:{source_bucket}")
+    #print(f"A file named:{source_file_name} is picked from bucket named:{source_bucket}")
 
     # get the content of the xml file
-    bucket_ref = storage_client.bucket(source_bucket)
-    source_blob = bucket_ref.blob(source_file_name)
-    content = source_blob.download_as_text()
+    content = extract_xml_content(source_bucket, source_file_name)
 
     # Reading an XML content from the file one by one
     root = ET.fromstring(content)
@@ -40,8 +35,8 @@ def publish_message(data, context):
     
     # below for loop checks all the xml tags with name 'book', one by one 
     # and storing its content to 'element' variable, 
-    # then we are fetching the key, value from 'element' 
-    # and storing it into 'row_date'
+    # then we are fetching the value for corresponding keys from 'element' 
+    # and storing it into 'row_data'
     for element in root.findall('.//book'): 
         row_data={
             "id": element.get("id"),
@@ -63,94 +58,43 @@ def publish_message(data, context):
         upload_to_pubsub(book_xml)
 
         # Convert xml data into jsonl format
-        logger.info(f"starting xml to json conversion")
         json_conv_data = xml_to_json_conv(book_xml)
-
-        print(type(json_conv_data))
 
         # publish json string to bigquery dataset
         upload_to_bq(json_conv_data, 'plated-hash-405319', 'bq_dataset_4_wf_4_tf_buk_2_pub_big_id', 'bq_table_4_wf_4_tf_buk_2_pub_big')
-    
+        
+        file_counter = publish_xml_gcs(file_counter, book_xml)
         # Write xml content into an xml file and publishe it to cloud storage
-        target_file_name="xml_file_processed_"+f"{file_counter}"+".xml"
-        print(f"Target file name would be {target_file_name}")
-  
-        # we are using tempfile(python library) to create a temporary file WITHIN THIS INSTANCE MEMORY 
-        # and storing the xml content from 'book_xml' into that temp file
 
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(book_xml.encode("utf-8"))
-
-        # Upload the temporary file to Google Cloud Storage
-        upload_to_gcs(target_bucket_ref, target_file_name, temp_file.name)
-
-        # Clean up the temporary file (optional)
-        os.remove(temp_file.name)
-
-        file_counter = file_counter + 1
     return f"success"
 
-def upload_to_pubsub(xml_content_pb):
-    logger.info(f"Execution of upload_to_pubsub has been started")
-    message_future = pubsub_client.publish(topic_path,data=xml_content_pb.encode("utf-8"))
-    print("xml content has been published to pubsub")
-    print(f"{xml_content_pb}")
+def extract_xml_content(s_bucket, s_f_name):
+    bucket_ref = storage_client.bucket(s_bucket)
+    source_blob = bucket_ref.blob(s_f_name)
+    xml_content = source_blob.download_as_text()
 
-def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
-    logger.info(f"Execution of upload_to_gcs has been started")
-    target_blob = t_bucket_ref.blob(t_f_name)
-    target_blob.upload_from_filename(local_file_path)
+    return xml_content
 
-def xml_to_json_conv(xml_content_bq):
-    # parse xml to json dictionary
-    logger.info(f"Execution of xml_to_json_conv has been started")
-    print(f"Xml data which will be processed is: {xml_content_bq}")
+def publish_xml_gcs(f_counter, b_xml):
+    target_file_name="xml_file_processed_"+f"{f_counter}"+".xml"
+    print(f"Target file name would be {target_file_name}")
+  
+    # we are using tempfile(python library) to create a temporary file WITHIN THIS INSTANCE MEMORY 
+    # and storing the xml content from 'book_xml' into that temp file
 
-    data_dict = xmltodict.parse(xml_content_bq)
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        temp_file.write(b_xml.encode("utf-8"))
 
-    # Extract relevent data structure from dictionary
-    catalog = data_dict.get('book', {})
-    books = catalog if isinstance(catalog,list) else [catalog]
+    # Upload the temporary file to Google Cloud Storage
+    upload_to_gcs(target_bucket_ref, target_file_name, temp_file.name)
 
-    # convert each book to JSONL entry
-    jsonl_entries = []
-    print("Entering the for loop")
-    for book_var in books:
-        print("inside loop")
-        jsonl_entry = json.dumps(book_var)
-        jsonl_entries.append(jsonl_entry)
-    print("Exiting the for loop")
-    print(f"value of the formated json data is: {jsonl_entries}")
-    return jsonl_entries
+    # Clean up the temporary file (optional)
+    os.remove(temp_file.name)
 
-def upload_to_bq(json_data, project_id, dataset_id, table_id):
+    f_counter = f_counter + 1    
+    return f_counter
 
-    logger.info(f"Execution of upload_to_bq has been started")
 
-    logger.info(f"inside xml_to_json_comv functionx, step1")
-    # convert the json string to a list of dictionaries
-    data = [json.loads(line) for line in json_data]
-
-    print(f"printing the json data which will be published to BQ table{data}")
-
-    # create a BQ table reference
-    table_ref = bq_client.dataset(dataset_id).table(table_id)
-    logger.info(f"inside xml_to_json_comv functionx, step3")
-
-    # configuration for loading data  into Bigquery
-    job_config = bigquery.LoadJobConfig(write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
-    )
-    logger.info(f"inside xml_to_json_comv functionx, step4")
-
-    # Load data into BigQuery table
-    load_job = bq_client.load_table_from_json(data, table_ref, job_config=job_config)
-    
-    logger.info(f"inside xml_to_json_comv functionx, step5")
-
-    load_job.result()
-
-    print(f"Data loaded to {project_id}.{dataset_id}.{table_id}")
-    
 
 #below is a working code which triggers the cloud function with a https trigger
 #def publish_message(request):
