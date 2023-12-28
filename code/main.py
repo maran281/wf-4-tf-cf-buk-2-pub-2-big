@@ -87,7 +87,7 @@ def extract_xml_content(s_bucket, s_f_name):
 
 def publish_xml_gcs(s_file_name, f_counter, b_xml):
     current_timestamp = datetime.now()
-    target_file_name=f"{s_file_name}"+f"{f_counter}"+f"{current_timestamp}"+".xml"
+    target_file_name=f"{s_file_name}_"+f"{f_counter}_"+f"{current_timestamp}"+".xml"
     print(f"Target file name would be {target_file_name}")
   
     # we are using tempfile(python library) to create a temporary file WITHIN THIS INSTANCE MEMORY 
