@@ -40,12 +40,12 @@ def publish_message(data, context):
     for element in root.findall('.//book'): 
         row_data={
             "id": element.get("id"),
-            "author": element.find("author").text,
-            "genre": element.find('genre').text,
-            "price": float(element.find('price').text),
-            "publish_date": element.find('publish_date').text,
-            "description": element.find('description').text,
-            "Age_Criteria": element.find('Age_Criteria').text,
+            "author": element.find("author").text if element.find("author") is not None else None,
+            "genre": element.find('genre').text  if element.find("genre") is not None else None,
+            "price": float(element.find('price').text) if element.find("price") is not None else None,
+            "publish_date": element.find('publish_date').text if element.find("publish_date") is not None else None,
+            "description": element.find('description').text if element.find("description") is not None else None,
+            "Age_Criteria": element.find('Age_Criteria').text if element.find("Age_Criteria") is not None else None,
         }
 
         # Creating an xml content for each 'book' tag in the source xml
