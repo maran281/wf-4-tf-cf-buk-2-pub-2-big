@@ -105,6 +105,7 @@ def upload_to_gcs(t_bucket_ref, t_f_name, local_file_path):
 def xml_to_json_conv(xml_content_bq):
     # parse xml to json dictionary
     logger.info(f"Execution of xml_to_json_conv has been started")
+    print(f"Xml data which will be processed is: {xml_content_bq}")
 
     data_dict = xmltodict.parse(xml_content_bq)
 
@@ -117,9 +118,10 @@ def xml_to_json_conv(xml_content_bq):
     print("Entering the for loop")
     for book_var in books:
         print("inside loop")
-        jsonl_entry = json.dumps({"catalog": {"book": book_var}})
+        jsonl_entry = json.dumps(book_var)
         jsonl_entries.append(jsonl_entry)
     print("Exiting the for loop")
+    print(f"value of the formated json data is: {jsonl_entries}")
     return jsonl_entries
 
 def upload_to_bq(json_data, project_id, dataset_id, table_id):
@@ -128,21 +130,24 @@ def upload_to_bq(json_data, project_id, dataset_id, table_id):
 
     logger.info(f"inside xml_to_json_comv functionx, step1")
     # convert the json string to a list of dictionaries
-    data = [json.loads(line) for line in json_data.split("\n") if line.strip()]
-    logger.info(f"inside xml_to_json_comv functionx, step2")
+    data = [json.loads(line) for line in json_data]
+
+    print(f"printing the json data which will be published to BQ table{data}")
 
     # create a BQ table reference
     table_ref = bq_client.dataset(dataset_id).table(table_id)
     logger.info(f"inside xml_to_json_comv functionx, step3")
 
     # configuration for loading data  into Bigquery
-    job_config = bigquery.LoadJobConfig(
-        #autodetect=True,  # Automatically detect schema
-        write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
+    job_config = bigquery.LoadJobConfig(write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
     )
+    logger.info(f"inside xml_to_json_comv functionx, step4")
 
     # Load data into BigQuery table
     load_job = bq_client.load_table_from_json(data, table_ref, job_config=job_config)
+    
+    logger.info(f"inside xml_to_json_comv functionx, step5")
+
     load_job.result()
 
     print(f"Data loaded to {project_id}.{dataset_id}.{table_id}")
