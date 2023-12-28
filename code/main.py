@@ -46,7 +46,6 @@ def publish_message(data, context):
         row_data={
             "id": element.get("id"),
             "author": element.get("author"),
-            "title": element.find('title').text,
             "genre": element.find('genre').text,
             "price": float(element.find('price').text),
             "publish_date": element.find('publish_date').text,
