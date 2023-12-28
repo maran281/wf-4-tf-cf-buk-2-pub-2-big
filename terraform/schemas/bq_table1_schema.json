@@ -3,7 +3,7 @@
     {"name": "author", "type": "STRING", "mode": "NULLABLE"},
     {"name": "genre", "type": "STRING", "mode": "NULLABLE"},
     {"name": "price", "type": "FLOAT", "mode": "NULLABLE"},
-    {"name": "publish_date", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "publish_date", "type": "DATE", "mode": "NULLABLE"},
     {"name": "description", "type": "STRING", "mode": "NULLABLE"},
     {"name": "Age_Criteria", "type": "STRING", "mode": "NULLABLE"}
 ]
