@@ -53,7 +53,6 @@ resource "google_bigquery_dataset" "bq_dataset_4_wf_4_tf_buk_2_pub_big" {
     project = "plated-hash-405319"
     location = "us-east1"
     default_table_expiration_ms = 3600000
-
     labels = {
       environment="development_env"
     }
@@ -66,7 +65,7 @@ resource "google_bigquery_table" "bq_table_4_wf_4_tf_buk_2_pub_big" {
   table_id = "bq_table_4_wf_4_tf_buk_2_pub_big"
 
   schema = jsonencode(jsondecode(file("schemas/bq_table1_schema.json")))
-  deletion_protection = false
+  deletion_protection=false
   time_partitioning {
     type = "DAY"
   }
