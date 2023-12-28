@@ -7,6 +7,7 @@ from xml_to_json_conv import xml_to_json_conv
 from upload_to_gcs import upload_to_gcs
 from upload_to_bq import upload_to_bq
 from google.cloud import storage
+from datetime import datetime
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -64,8 +65,16 @@ def publish_message(data, context):
         # publish json string to bigquery dataset
         upload_to_bq(json_conv_data, 'plated-hash-405319', 'bq_dataset_4_wf_4_tf_buk_2_pub_big_id', 'bq_table_4_wf_4_tf_buk_2_pub_big')
         
-        file_counter = publish_xml_gcs(file_counter, book_xml)
-        # Write xml content into an xml file and publishe it to cloud storage
+        file_counter, file_status = publish_xml_gcs(source_file_name, file_counter, book_xml)
+
+        if file_status == 'success':
+            bucket = storage_client.get_bucket(source_bucket)
+            blob = bucket.blob(source_file_name)
+            blob.delete()
+            logger.info(f"processing of file {source_file_name} is completed and file is deleted from the source bucket")
+        else:
+            logger.info(f"processing of file {source_file_name} is failed")
+
 
     return f"success"
 
@@ -76,8 +85,9 @@ def extract_xml_content(s_bucket, s_f_name):
 
     return xml_content
 
-def publish_xml_gcs(f_counter, b_xml):
-    target_file_name="xml_file_processed_"+f"{f_counter}"+".xml"
+def publish_xml_gcs(s_file_name, f_counter, b_xml):
+    current_timestamp = datetime.now()
+    target_file_name=f"{s_file_name}"+f"{f_counter}"+f"{current_timestamp}"+".xml"
     print(f"Target file name would be {target_file_name}")
   
     # we are using tempfile(python library) to create a temporary file WITHIN THIS INSTANCE MEMORY 
@@ -92,8 +102,9 @@ def publish_xml_gcs(f_counter, b_xml):
     # Clean up the temporary file (optional)
     os.remove(temp_file.name)
 
-    f_counter = f_counter + 1    
-    return f_counter
+    f_counter = f_counter + 1 
+    result = "success" 
+    return f_counter, result
 
 
 
