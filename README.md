@@ -7,9 +7,10 @@ API/Tools/frameworks used
 - GITHUB actions pipeline for CI/CD
 - Workload Identity Federation: For authenticating the github actions pipeline to google project
 - GCS Bucket:
-      - For storing the terraform state.
-      - For storing the code for cloud function.
-      - For storing the source file from where the CF will pick the data.
+  1. For storing the terraform state.
+  2. For storing the code for cloud function.
+  3. For storing the source file from where the CF will pick the data.
+  4. For storing the target file where CF will publish the data after processing the source file.
 
 * This code deploys a cloud function in GC using Terraform.
 * This code uses github actions pipeline which uses WIF for authentication and initialize terraform.
