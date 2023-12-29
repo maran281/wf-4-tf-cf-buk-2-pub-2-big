@@ -1,6 +1,16 @@
 # wf-4-tf-cf-buk-2-pub-2-big
 Work Flow for Terraform, Cloud Function, Bucket to Pub/sub to BigQuery
 
+API/Tools/frameworks used
+- Terraform: For the creation of various resource like GCS Bucket, Cloud Function, PUB/SUB, BIGQuery etc.
+- Cloud function: For the deployment of an API written in PYTHON.
+- GITHUB actions pipeline for CI/CD
+- Workload Identity Federation: For authenticating the github actions pipeline to google project
+- GCS Bucket:
+      - For storing the terraform state.
+      - For storing the code for cloud function.
+      - For storing the source file from where the CF will pick the data.
+
 * This code deploys a cloud function in GC using Terraform.
 * This code uses github actions pipeline which uses WIF for authentication and initialize terraform.
 * Terraform is used to create various buckets, pubsub topic, terraform state file and cloud function.
