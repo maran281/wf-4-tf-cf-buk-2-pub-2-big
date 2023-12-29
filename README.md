@@ -5,6 +5,7 @@ API/Tools/frameworks used
 - **GITHUB actions** pipeline for CI/CD
 - **Workload Identity Federation**: For authenticating the github actions pipeline to google project
 - **Terraform**: For the creation of various resource like GCS Bucket, Cloud Function, PUB/SUB, BIGQuery etc.
+- **Pub/Sub**: For storing the xml data
 - **GCS Bucket**:
   1. For storing the terraform state.
   2. For storing the code for cloud function.
