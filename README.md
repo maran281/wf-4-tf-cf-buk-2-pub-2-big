@@ -1,5 +1,5 @@
 # wf-4-tf-cf-buk-2-pub-2-big
-Work Flow for Terraform, Cloud Function, Bucket to Pub/sub to BigQuery
+**W**ork**F**low **for** **T**erraf****orm, **C**loud **F**unction, **Bu**c**k**et **to** **Pub**/sub **to** **Big**Query
 
 API/Tools/frameworks used
 - Terraform: For the creation of various resource like GCS Bucket, Cloud Function, PUB/SUB, BIGQuery etc.
